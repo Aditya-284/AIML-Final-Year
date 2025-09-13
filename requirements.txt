@@ -1,0 +1,16 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+pandas>=2.2.2
+numpy>=2.1.0
+be-great==0.0.9
+datasets>=4.0.0
+transformers>=4.56.0
+scikit-learn>=1.6.1
+torch>=2.8.0
+tqdm>=4.67.1
+accelerate>=1.10.1
+sdmetrics>=0.23.0
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+aiofiles==23.2.1

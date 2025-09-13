@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetic Data Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 1.25rem;
+            color: #7f8c8d;
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+            font-weight: 400;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .feature-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-description {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-section {
+            background: white;
+            border: 2px dashed #d1d5db;
+            border-radius: 16px;
+            padding: 3rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section:hover {
+            border-color: #6b7280;
+            background-color: #f9fafb;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-section.dragover {
+            border-color: #6b7280;
+            background-color: #f3f4f6;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.125rem;
+            color: #7f8c8d;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-text strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .upload-hint {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            background: #34495e;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.animate-pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(107, 114, 128, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(107, 114, 128, 0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .parameters {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .parameters h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .param-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .param-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .param-group label {
+            font-weight: 500;
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+
+        .param-group input {
+            width: 100px;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .param-group input:focus {
+            outline: none;
+            border-color: #6b7280;
+            box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+        }
+
+        .progress {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .progress-bar {
+            background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+            height: 12px;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 1rem;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .results {
+            display: none;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .results h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .metric {
+            background: #f9fafb;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s ease;
+        }
+
+        .metric:hover {
+            transform: translateY(-2px);
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            color: #7f8c8d;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .error {
+            display: none;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            color: #6b7280;
+        }
+
+        .file-info {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            display: none;
+        }
+
+        .file-info h4 {
+            color: #2c3e50;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .file-info p {
+            color: #7f8c8d;
+            margin: 0.25rem 0;
+            font-size: 0.9rem;
+        }
+
+        .generate-section {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .info-section {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .info-icon {
+            font-size: 1.25rem;
+        }
+
+        .info-text {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f3f4f6;
+            color: #4b5563;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SyntheticData Generator</h1>
+            <p>Generate privacy-protected synthetic datasets that maintain statistical accuracy. Upload your data and download synthetic versions for safe testing and development.</p>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <span class="feature-icon">🛡️</span>
+                    <div class="feature-title">Privacy Protected</div>
+                    <div class="feature-description">Generate datasets that preserve privacy while maintaining data utility</div>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">⚡</span>
+                    <div class="feature-title">Fast Generation</div>
+                    <div class="feature-description">Advanced algorithms ensure quick processing of your datasets</div>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📊</span>
+                    <div class="feature-title">Statistical Accuracy</div>
+                    <div class="feature-description">Maintain distributions, correlations, and patterns from your original data</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">
+                    <strong>Click to upload</strong> or drag and drop your CSV file here
+                </div>
+                <div class="upload-hint">
+                    Supported formats: CSV files up to 10MB
+                </div>
+                <input type="file" id="fileInput" class="file-input" accept=".csv">
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                <h4>📄 Selected File</h4>
+                <p id="fileName">Name: -</p>
+                <p id="fileSize">Size: -</p>
+            </div>
+
+            <div class="parameters">
+                <h3>⚙️ Generation Parameters</h3>
+                <div class="param-group">
+                    <label for="nSamples">Number of Samples:</label>
+                    <input type="number" id="nSamples" value="50" min="10" max="1000">
+                </div>
+                <div class="param-group">
+                    <label for="epochs">Training Epochs:</label>
+                    <input type="number" id="epochs" value="10" min="5" max="100">
+                </div>
+                <div class="param-group">
+                    <label for="batchSize">Batch Size:</label>
+                    <input type="number" id="batchSize" value="64" min="8" max="128">
+                </div>
+            </div>
+
+            <div class="generate-section" id="generateSection" style="display: none;">
+                <button class="btn animate-pulse-glow" id="generateBtn" onclick="generateSyntheticData()">
+                    🚀 Generate Synthetic Dataset
+                </button>
+            </div>
+
+            <div class="progress" id="progress">
+                <div class="progress-bar" id="progressBar"></div>
+                <div class="progress-text" id="progressText">Preparing...</div>
+            </div>
+
+            <div class="results" id="results">
+                <h3>✅ Generation Complete!</h3>
+                <div class="metrics" id="metrics"></div>
+                <div style="text-align: center;">
+                    <button class="btn" onclick="downloadSyntheticData()">
+                        📥 Download Synthetic Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div class="info-section">
+                <h3>🔒 How It Works</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-icon">📤</span>
+                        <span class="info-text">Upload your CSV dataset</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🤖</span>
+                        <span class="info-text">AI analyzes data patterns</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🛡️</span>
+                        <span class="info-text">Privacy-preserving generation</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">📥</span>
+                        <span class="info-text">Download synthetic data</span>
+                    </div>
+                </div>
+                <div class="security-badge">
+                    <span>🔒</span>
+                    <span>Your data is processed securely and never stored permanently</span>
+                </div>
+            </div>
+        </div>
+
+        <footer style="margin-top: 4rem; text-align: center; font-size: 0.875rem; color: #7f8c8d;">
+            <p>Secure • Privacy-First • Enterprise-Ready</p>
+            <p style="margin-top: 0.5rem; font-size: 0.75rem;">Powered by advanced AI algorithms for data privacy and utility</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentSessionId = null;
+        let selectedFile = null;
+
+        // File upload handling
+        const uploadSection = document.getElementById('uploadSection');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const generateBtn = document.getElementById('generateBtn');
+
+        // Drag and drop functionality
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        uploadSection.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                showError('Please select a CSV file.');
+                return;
+            }
+
+            selectedFile = file;
+            
+            // Show file info
+            document.getElementById('fileName').textContent = `Name: ${file.name}`;
+            document.getElementById('fileSize').textContent = `Size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            document.getElementById('fileInfo').style.display = 'block';
+            
+            // Show generate section
+            document.getElementById('generateSection').style.display = 'block';
+            
+            // Hide previous results/errors
+            hideResults();
+            hideError();
+            
+            // Show success toast
+            showToast('File uploaded successfully', `${file.name} is ready for processing.`);
+        }
+
+        async function generateSyntheticData() {
+            if (!selectedFile) {
+                showError('Please select a file first.');
+                return;
+            }
+
+            // Show progress
+            showProgress();
+            document.getElementById('generateBtn').disabled = true;
+
+            // Get parameters
+            const nSamples = parseInt(document.getElementById('nSamples').value) || 100;
+            const epochs = parseInt(document.getElementById('epochs').value) || 30;
+            const batchSize = parseInt(document.getElementById('batchSize').value) || 32;
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('n_samples', nSamples);
+            formData.append('epochs', epochs);
+            formData.append('batch_size', batchSize);
+
+            try {
+                // Simulate progress updates
+                simulateProgress();
+
+                // Make API call
+                const response = await fetch('http://localhost:8000/upload-and-generate', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Generation failed');
+                }
+
+                const result = await response.json();
+                currentSessionId = result.session_id;
+                
+                // Show results
+                showResults(result);
+                showToast('Generation complete!', 'Your synthetic dataset is ready for download.');
+                
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                hideProgress();
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        function simulateProgress() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 90) progress = 90;
+                updateProgress(progress);
+                
+                if (progress >= 90) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `Generating synthetic data... ${Math.round(percent)}%`;
+        }
+
+        function showProgress() {
+            document.getElementById('progress').style.display = 'block';
+            updateProgress(0);
+        }
+
+        function hideProgress() {
+            document.getElementById('progress').style.display = 'none';
+        }
+
+        function showResults(result) {
+            const results = document.getElementById('results');
+            const metrics = document.getElementById('metrics');
+            
+            // Display quality metrics
+            metrics.innerHTML = `
+                <div class="metric">
+                    <div class="metric-value">${result.quality_metrics.exact_match_count}</div>
+                    <div class="metric-label">Exact Matches</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${result.quality_metrics.nearest_neighbor_distance.toFixed(4)}</div>
+                    <div class="metric-label">Avg Distance</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${(result.quality_metrics.membership_inference_risk * 100).toFixed(2)}%</div>
+                    <div class="metric-label">Privacy Risk</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">${result.n_samples}</div>
+                    <div class="metric-label">Samples Generated</div>
+                </div>
+            `;
+            
+            results.style.display = 'block';
+        }
+
+        function hideResults() {
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function showError(message) {
+            const error = document.getElementById('error');
+            error.textContent = message;
+            error.style.display = 'block';
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        async function downloadSyntheticData() {
+            if (!currentSessionId) {
+                showError('No session ID available for download.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8000/download/${currentSessionId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Download failed');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `synthetic_${selectedFile?.name || 'dataset'}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showToast('Download started', 'Your synthetic dataset is being downloaded.');
+                
+            } catch (error) {
+                showError(`Download failed: ${error.message}`);
+            }
+        }
+
+        function showToast(title, description) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border: 1px solid #e5e7eb;
+                border-radius: 8px;
+                padding: 1rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                max-width: 300px;
+                animation: slideIn 0.3s ease;
+            `;
+            
+            toast.innerHTML = `
+                <div style="font-weight: 600; color: #2c3e50; margin-bottom: 0.25rem;">${title}</div>
+                <div style="font-size: 0.875rem; color: #7f8c8d;">${description}</div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Remove toast after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Test API connection on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('http://localhost:8000/docs');
+                if (response.ok) {
+                    showToast('API Connected', 'Backend server is running and ready!');
+                } else {
+                    showError('API server is not responding. Please start the server.');
+                }
+            } catch (error) {
+                showError('Cannot connect to API server. Please start the server with: .venv\\Scripts\\python.exe run_server.py');
+            }
+        });
+    </script>
+</body>
+</html>
